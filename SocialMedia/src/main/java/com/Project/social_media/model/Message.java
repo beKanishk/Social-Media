@@ -33,6 +33,8 @@ public class Message {
 	@Enumerated(EnumType.STRING)
 	private MessageType type;
 	
+	private MessageType messageSide; //means sender or receiver
+	
 	public Long getId() {
 		return id;
 	}
@@ -79,6 +81,14 @@ public class Message {
 
 	public void setType(MessageType type) {
 		this.type = type;
+	}
+
+	public MessageType getMessageSide() {
+		return messageSide;
+	}
+
+	public void setMessageSide(MessageType messageSide) {
+		this.messageSide = messageSide;
 	}
 	
 	

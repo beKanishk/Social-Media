@@ -1,0 +1,5 @@
+export const RECEIVE_MESSAGE = 'RECEIVE_MESSAGE';
+export const LOAD_MESSAGES = 'LOAD_MESSAGES';
+
+export const SEND_MESSAGE = "SEND_MESSAGE";
+export const SET_MESSAGES = "SET_MESSAGES";

@@ -32,13 +32,28 @@ public class JwtProvider {
 		return jwt;
 	}
 
+//	public static String getEmailFromToken(String token) {
+//		token = token.substring(7);
+//		Claims claims = Jwts.parser().setSigningKey(key).build().parseClaimsJws(token).getBody();
+//		
+//		String email = String.valueOf(claims.get("email"));
+//		return email;
+//	}
+	
 	public static String getEmailFromToken(String token) {
-		token = token.substring(7);
-		Claims claims = Jwts.parser().setSigningKey(key).build().parseClaimsJws(token).getBody();
-		
-		String email = String.valueOf(claims.get("email"));
-		return email;
+	    if (token.startsWith("Bearer ")) {
+	        token = token.substring(7);
+	    }
+	    
+	    Claims claims = Jwts.parserBuilder()
+	            .setSigningKey(key)
+	            .build()
+	            .parseClaimsJws(token)
+	            .getBody();
+
+	    return claims.get("email", String.class);
 	}
+
 	
 	private static String populateAuthorities(Collection<? extends GrantedAuthority> authorities) {
 		Set<String> auth = new HashSet<>();

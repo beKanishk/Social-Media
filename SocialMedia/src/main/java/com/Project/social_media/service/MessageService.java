@@ -60,6 +60,7 @@ public class MessageService implements MessageServiceInterface{
 	    message.setContent(msg.getContent());
 	    message.setCreatedAt(LocalDateTime.now().toString());
 	    message.setType(msg.getType());
+	    message.setMessageSide(msg.getMessageSide());
 	    
 	    if (msg.getType() == MessageType.POST && msg.getPostId() != null) {
 	        Optional<Post> post = postRepository.findById(msg.getPostId());
@@ -75,10 +76,14 @@ public class MessageService implements MessageServiceInterface{
 	    response.setTimestamp(message.getCreatedAt());
 	    response.setSenderName(sender.getName());
 	    
-	    if (msg.getType() == MessageType.POST) {
+	    if (msg.getType() == MessageType.POST && msg.getPostId() != null) {
 	    	Optional<Post> post = postRepository.findById(msg.getPostId());
-	        response.setPostId(msg.getPostId());
-	        response.setPostImageURL(post.get().getImageUrl());
+	    	if(post.get() != null) {
+	    		response.setPostId(msg.getPostId());
+		        response.setPostImageURL(post.get().getImageUrl());
+		        response.setPost(post.get());
+	    	}
+	        
 	    }
 	    
 	    return response;

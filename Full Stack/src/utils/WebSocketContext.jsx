@@ -1,45 +1,52 @@
+import React, { createContext, useEffect, useState } from "react";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-import { createContext, useEffect, useRef } from "react";
+import { useDispatch } from "react-redux";
+import { receiveMessage } from "../redux/Message/Action";
+
 
 export const WebSocketContext = createContext();
 
 const WebSocketProvider = ({ children, userEmail }) => {
-  const stompClient = useRef(null);
+  const [connected, setConnected] = useState(false);
+  const [client, setClient] = useState(null);
+  const dispatch = useDispatch(); // ✅
 
   useEffect(() => {
     const jwt = localStorage.getItem("jwt");
+    const encodedJwt = encodeURIComponent(jwt);
+    const socketUrl = `http://localhost:8080/ws?jwt=${encodedJwt}`;
 
-    // IMPORTANT: Pass token as query param, since SockJS does NOT support custom headers
-    const socketUrl = "http://localhost:8080/ws?jwt=" + jwt;
-
-    const client = new Client({
-      webSocketFactory: () => new SockJS(socketUrl), // Updated line
-      debug: (str) => console.log(str),
+    const stompClient = new Client({
+      webSocketFactory: () => new SockJS(socketUrl),
       reconnectDelay: 5000,
+      debug: (str) => console.log(str),
       onConnect: () => {
-        console.log("WebSocket connected");
-
-        // Subscribe to user's private message queue
-        client.subscribe(`/user/${userEmail}/queue/messages`, (message) => {
+        console.log("✅ WebSocket connected");
+        setConnected(true);
+        setClient(stompClient);
+        stompClient.subscribe(`/user/${userEmail}/queue/messages`, (message) => {
           const msg = JSON.parse(message.body);
-          console.log("Private message received:", msg);
+          console.log("📩 Received message:", msg);
+          dispatch(receiveMessage(msg)); // ✅ Dispatch to Redux
         });
+      },
+      onDisconnect: () => {
+        console.log("WebSocket disconnected");
+        setConnected(false);
+        setClient(null);
       },
     });
 
-    client.activate();
-    stompClient.current = client;
+    stompClient.activate();
 
     return () => {
-      if (stompClient.current) {
-        stompClient.current.deactivate();
-      }
+      stompClient.deactivate();
     };
-  }, [userEmail]);
+  }, [userEmail, dispatch]);
 
   return (
-    <WebSocketContext.Provider value={{ stompClient: stompClient.current }}>
+    <WebSocketContext.Provider value={{ stompClient: client, connected }}>
       {children}
     </WebSocketContext.Provider>
   );

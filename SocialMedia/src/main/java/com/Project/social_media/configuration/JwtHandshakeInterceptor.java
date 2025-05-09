@@ -12,32 +12,29 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 @Component
 public class JwtHandshakeInterceptor implements HandshakeInterceptor {
 
-    @Override
-    public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
-                                   WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
-        if (request instanceof ServletServerHttpRequest servletRequest) {
-            String jwt = servletRequest.getServletRequest().getParameter("jwt");
+	@Override
+	public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
+	                               WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
+	    if (request instanceof ServletServerHttpRequest servletRequest) {
+	        String jwt = servletRequest.getServletRequest().getParameter("jwt");
+	        System.out.println("Raw JWT: " + jwt);
 
-            String token = (String) attributes.get("jwt");
-            if (token != null && token.startsWith("Bearer ")) {
-                token = token.substring(7); // Remove "Bearer " prefix
-            
+	        if (jwt != null) {
+	            try {
+	                String email = JwtProvider.getEmailFromToken(jwt); // Validate + parse
+	                attributes.put("email", email);
+	                return true;
+	            } catch (Exception e) {
+	                System.out.println("Invalid JWT: " + e.getMessage());
+	            }
+	        } else {
+	            System.out.println("JWT token not found in WebSocket handshake request");
+	        }
+	    }
+	    return false; // reject handshake
+	}
 
-
-                try {
-                    String email = JwtProvider.getEmailFromToken(jwt); // Implement your logic
-                    attributes.put("email", email);
-                    return true;
-                } catch (Exception e) {
-                    System.out.println("Invalid JWT: " + e.getMessage());
-                }
-            } else {
-                System.out.println("JWT token not found in WebSocket handshake request");
-            }
-        }
-        return false; // Reject handshake
-    }
-
+	
     @Override
     public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response,
                                WebSocketHandler wsHandler, Exception exception) {

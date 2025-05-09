@@ -5,6 +5,7 @@ import postReducer from "./Post/Reducer";
 import followReducer from "./Follower/Reducer";
 import commentReducer from "./Comment/Reducer";
 import userProfile from "./User/Reducer";
+import messageReducer from "./Message/Reducer";
 
 // Combine all reducers
 const rootReducer = combineReducers({
@@ -13,6 +14,7 @@ const rootReducer = combineReducers({
   follow: followReducer,
   comments: commentReducer,
   userProfile: userProfile,
+  message: messageReducer,
 });
 
 // Create the store

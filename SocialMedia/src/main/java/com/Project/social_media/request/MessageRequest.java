@@ -6,6 +6,7 @@ public class MessageRequest {
 	private String content;
 	private Long receiverId;
 	private MessageType type;
+	private MessageType messageSide; //means sender or receiver
 	private Long postId;
 	
 	public Long getPostId() {
@@ -31,6 +32,12 @@ public class MessageRequest {
 	}
 	public void setType(MessageType type) {
 		this.type = type;
+	}
+	public MessageType getMessageSide() {
+		return messageSide;
+	}
+	public void setMessageSide(MessageType messageSide) {
+		this.messageSide = messageSide;
 	}
 	
 	

@@ -1,11 +1,14 @@
 package com.Project.social_media.response;
 
+import com.Project.social_media.model.Post;
+
 public class MessageResponse {
 	private String content;
 	private String timestamp;
 	private String senderName;
 	private Long postId;
 	private String postImageURL;
+	private Post post;
 	
 	public Long getPostId() {
 		return postId;
@@ -42,5 +45,11 @@ public class MessageResponse {
 	}
 	public void setPostImageURL(String postImageURL) {
 		this.postImageURL = postImageURL;
+	}
+	public Post getPost() {
+		return post;
+	}
+	public void setPost(Post post) {
+		this.post = post;
 	}
 }

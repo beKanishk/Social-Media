@@ -35,6 +35,8 @@ public class FollowerService implements FollowersServiceInterface{
 			userResponse.setBio(follower.getFollower().getBio());
 			userResponse.setName(follower.getFollower().getName());
 			userResponse.setUserName(follower.getFollower().getUserName());
+			userResponse.setUserId(follower.getFollower().getId());
+			userResponse.setUserEmail(follower.getFollower().getUserEmail());
 			
 			responses.add(userResponse);
 		}
@@ -53,6 +55,8 @@ public class FollowerService implements FollowersServiceInterface{
 			userResponse.setBio(follower.getFollowing().getBio());
 			userResponse.setName(follower.getFollowing().getName());
 			userResponse.setUserName(follower.getFollowing().getUserName());
+			userResponse.setUserId(follower.getFollowing().getId());
+			userResponse.setUserEmail(follower.getFollowing().getUserEmail());
 			
 			responses.add(userResponse);
 		}

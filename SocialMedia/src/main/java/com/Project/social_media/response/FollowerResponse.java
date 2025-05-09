@@ -4,6 +4,9 @@ public class FollowerResponse {
 	private String userName;
 	private String bio;
 	private String name;
+	private Long userId;
+	private String userEmail;
+	
 	public String getUserName() {
 		return userName;
 	}
@@ -13,6 +16,12 @@ public class FollowerResponse {
 	public String getBio() {
 		return bio;
 	}
+	public Long getUserId() {
+		return userId;
+	}
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
 	public void setBio(String bio) {
 		this.bio = bio;
 	}
@@ -21,6 +30,12 @@ public class FollowerResponse {
 	}
 	public void setName(String name) {
 		this.name = name;
+	}
+	public String getUserEmail() {
+		return userEmail;
+	}
+	public void setUserEmail(String userEmail) {
+		this.userEmail = userEmail;
 	} 
 
 }
