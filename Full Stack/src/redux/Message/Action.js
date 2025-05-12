@@ -16,6 +16,6 @@ export const receiveMessage = (message) => ({
   });
 
   export const sendMessage = (message) => ({
-    type: RECEIVE_MESSAGE, // we treat it like a received message for local UI update
+    type: RECEIVE_MESSAGE, 
     payload: message,
   });

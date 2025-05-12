@@ -4,6 +4,8 @@ import WebSocketProvider from "../utils/WebSocketContext";
 import { useDispatch, useSelector } from "react-redux";
 import { getUser } from "../redux/Auth/Action";
 import SuggestionsSidebar from "../components/SuggestionsSidebar";
+import Navbar from "../components/Navbar";
+
 
 const ChatPage = () => {
   const dispatch = useDispatch();
@@ -21,16 +23,20 @@ const ChatPage = () => {
   // const userEmail = user?.userEmail;
 
   return (
-    <div className="flex gap-6">
-      <SuggestionsSidebar onUserSelect={setChatPartner} />
-      <div className="flex-1">
-        {chatPartner && chatPartner.userEmail && (
-          <WebSocketProvider userEmail={chatPartner.userEmail}>
-            <ChatWindow receiverId={chatPartner.userId} />
-          </WebSocketProvider>
-        )}
+    <>
+      <Navbar/>
+      <div className="flex gap-6">
+        <SuggestionsSidebar onUserSelect={setChatPartner} />
+        <div className="flex-1">
+          {chatPartner && chatPartner.userEmail && (
+            // <WebSocketProvider userEmail={chatPartner.userEmail}>
+              <ChatWindow receiverId={chatPartner.userId} />
+            // </WebSocketProvider>
+          )}
+        </div>
       </div>
-    </div>
+    </>
+    
   );
 };
 
