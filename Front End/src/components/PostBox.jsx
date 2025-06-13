@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { createPost } from '../redux/Post/Action';
+import { toast } from 'react-toastify';
+
 
 const PostBox = () => {
   const [content, setContent] = useState('');
@@ -12,17 +14,23 @@ const PostBox = () => {
   };
 
   const handleSubmit = () => {
-    const formData = new FormData();
-    formData.append('content', content);
-    if (image) {
-      formData.append('image', image);
-    }
+  const formData = new FormData();
+  formData.append('content', content);
+  if (image) {
+    formData.append('image', image);
+  }
 
-    // TODO: Dispatch Redux action here
-    dispatch(createPost(formData, localStorage.getItem("jwt")))
+  dispatch(createPost(formData, localStorage.getItem("jwt")))
+    .then(() => {
+      toast.success("Post created successfully!");
+      setContent(""); // clear input
+      setImage(null); // clear image
+    })
+    .catch((err) => {
+      toast.error("Failed to create post!");
+    });
+};
 
-    console.log('Form data prepared:', formData);
-  };
 
   return (
     <div className="card mb-3">

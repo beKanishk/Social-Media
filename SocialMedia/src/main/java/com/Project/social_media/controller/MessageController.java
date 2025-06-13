@@ -1,14 +1,18 @@
 package com.Project.social_media.controller;
 
-
-
+import com.Project.social_media.model.Message;
+import com.Project.social_media.model.User;
+import com.Project.social_media.repository.MessageRepository;
 import com.Project.social_media.request.MessageRequest;
 import com.Project.social_media.response.MessageResponse;
 import com.Project.social_media.service.MessageService;
 import com.Project.social_media.service.UserService;
 
 import java.net.http.HttpClient;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,6 +30,9 @@ public class MessageController {
     
     @Autowired
     UserService userService;
+    
+    @Autowired
+    MessageRepository messageRepository;
   
     @GetMapping("/chat/messages/{userId}")
     public ResponseEntity<List<MessageResponse>> getMessage(
@@ -37,4 +44,33 @@ public class MessageController {
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+    
+    @GetMapping("/chat/users")
+    public ResponseEntity<List<User>> getChatUsers(@RequestHeader("Authorization") String jwt) throws Exception {
+        User user = userService.findUserProfileByJwt(jwt);
+        Set<User> chatUsers = new HashSet<>();
+
+        List<Message> received = messageRepository.findByReceiver(user);
+        List<Message> sent = messageRepository.findBySender(user);
+
+        for (Message m : received) chatUsers.add(m.getSender());
+        for (Message m : sent) chatUsers.add(m.getReceiver());
+
+        chatUsers.remove(user); // remove self if present
+        return new ResponseEntity<>(new ArrayList<>(chatUsers), HttpStatus.OK);
+    }
+    @GetMapping("/chat/users/{userId}")
+    public ResponseEntity<User> addChatUsers(@RequestHeader("Authorization") String jwt, @PathVariable Long userId) throws Exception {
+        User user = userService.findUserById(userId);
+
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+    
+    @PutMapping("/chat/mark-read/{senderId}")
+    public ResponseEntity<String> markMessagesAsRead(@RequestHeader("Authorization") String jwt, @PathVariable Long senderId) throws Exception {
+    	System.out.println("Mark message called");
+        messageService.markMessagesAsRead(jwt, senderId);
+        return ResponseEntity.ok("Marked as read");
+    }
+
 }

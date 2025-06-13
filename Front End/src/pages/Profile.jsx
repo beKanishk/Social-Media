@@ -55,7 +55,7 @@
 
 // export default Profile;
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import PostList from '../components/PostList';
 import { useDispatch, useSelector } from 'react-redux';

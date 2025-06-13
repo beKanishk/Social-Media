@@ -17,7 +17,6 @@ const ChatPage = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    console.log("Chat partner in chat page",chatPartner);
   }, [chatPartner])
 
   // const userEmail = user?.userEmail;
@@ -29,9 +28,7 @@ const ChatPage = () => {
         <SuggestionsSidebar onUserSelect={setChatPartner} />
         <div className="flex-1">
           {chatPartner && chatPartner.userEmail && (
-            // <WebSocketProvider userEmail={chatPartner.userEmail}>
               <ChatWindow receiverId={chatPartner.userId} />
-            // </WebSocketProvider>
           )}
         </div>
       </div>

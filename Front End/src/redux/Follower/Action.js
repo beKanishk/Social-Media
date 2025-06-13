@@ -10,6 +10,7 @@ import {
     FETCH_FOLLOWING_POSTS_REQUEST,
     FETCH_FOLLOWING_POSTS_SUCCESS,
     FETCH_FOLLOWING_POSTS_FAILURE,
+    ADD_CHAT_USER,
 } from "./ActionType";
 
 const BASE_URL = "http://localhost:8080"; 
@@ -94,4 +95,24 @@ export const createFollower = (userName, jwt) => async (dispatch, getState) => {
       });
     }
   };
-  
+
+  export const addChatUser = (senderId) => async (dispatch, getState) => {
+    try {
+      const { follow } = getState();
+      const existingUser = follow.chatUsers?.find(user => user.id === senderId);
+
+      if (existingUser) return; // Don't add duplicate
+
+      const jwt = localStorage.getItem("jwt");
+      const response = await axios.get(`http://localhost:8080/api/user/${senderId}`, {
+        headers: { Authorization: `Bearer ${jwt}` }
+      });
+
+      dispatch({
+        type: ADD_CHAT_USER,
+        payload: response.data, // Expected to be full user object
+      });
+    } catch (error) {
+      console.error("Failed to fetch sender info:", error);
+    }
+};

@@ -9,7 +9,24 @@ public class MessageResponse {
 	private Long postId;
 	private String postImageURL;
 	private Post post;
+	private boolean isRead;
+	private Long senderId;
+	private Long receiverId;
+	private String senderUserName;
+
 	
+	public Long getSenderId() {
+		return senderId;
+	}
+	public void setSenderId(Long senderId) {
+		this.senderId = senderId;
+	}
+	public String getSenderUserName() {
+		return senderUserName;
+	}
+	public void setSenderUserName(String senderUserName) {
+		this.senderUserName = senderUserName;
+	}
 	public Long getPostId() {
 		return postId;
 	}
@@ -51,5 +68,17 @@ public class MessageResponse {
 	}
 	public void setPost(Post post) {
 		this.post = post;
+	}
+	public boolean isRead() {
+		return isRead;
+	}
+	public void setRead(boolean isRead) {
+		this.isRead = isRead;
+	}
+	public Long getReceiverId() {
+		return receiverId;
+	}
+	public void setReceiverId(Long receiverId) {
+		this.receiverId = receiverId;
 	}
 }

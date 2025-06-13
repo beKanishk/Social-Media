@@ -40,11 +40,16 @@ public class MessageService implements MessageServiceInterface{
 		List<MessageResponse> messageResponses = new ArrayList<>();
 		
 		for(Message message : messages) {
+			if (!message.isRead() && message.getReceiver().getId().equals(user.getId())) {
+		        message.setRead(true); // mark as read
+		        messageRepository.save(message);
+		    }
 			MessageResponse response = new MessageResponse();
 			response.setContent(message.getContent());
 			response.setTimestamp(message.getCreatedAt());
 			response.setSenderName(message.getSender().getName());
-			
+			response.setRead(message.isRead());
+			response.setSenderId(message.getSender().getId());			
 			messageResponses.add(response);
 		}
 		return messageResponses;
@@ -61,6 +66,8 @@ public class MessageService implements MessageServiceInterface{
 	    message.setCreatedAt(LocalDateTime.now().toString());
 	    message.setType(msg.getType());
 	    message.setMessageSide(msg.getMessageSide());
+	    message.setRead(false);
+	   
 	    
 	    if (msg.getType() == MessageType.POST && msg.getPostId() != null) {
 	        Optional<Post> post = postRepository.findById(msg.getPostId());
@@ -75,6 +82,8 @@ public class MessageService implements MessageServiceInterface{
 	    response.setContent(message.getContent());
 	    response.setTimestamp(message.getCreatedAt());
 	    response.setSenderName(sender.getName());
+	    response.setSenderId(sender.getId());
+	    response.setReceiverId(receiver.getId());
 	    
 	    if (msg.getType() == MessageType.POST && msg.getPostId() != null) {
 	    	Optional<Post> post = postRepository.findById(msg.getPostId());
@@ -105,7 +114,19 @@ public class MessageService implements MessageServiceInterface{
 
 	    return "Message sent";
 	}
-	
+
+	public void markMessagesAsRead(String jwt, Long senderId) throws Exception {
+		User receiver = userService.findUserProfileByJwt(jwt);
+	    User sender = userService.findUserById(senderId);
+
+	    List<Message> messages = messageRepository.findByReceiverAndSender(receiver, sender);
+	    for (Message message : messages) {
+	        if (!message.isRead()) {
+	            message.setRead(true);
+	            messageRepository.save(message);
+	        }
+	    }
+	}
 }
 
 //	public void sendPostAsMessage(String jwt, Post post) {

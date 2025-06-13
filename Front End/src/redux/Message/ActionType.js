@@ -3,3 +3,5 @@ export const LOAD_MESSAGES = 'LOAD_MESSAGES';
 
 export const SEND_MESSAGE = "SEND_MESSAGE";
 export const SET_MESSAGES = "SET_MESSAGES";
+
+export const MARK_MESSAGES_AS_READ = "MARK_MESSAGES_AS_READ"

@@ -9,6 +9,7 @@ import {
     FETCH_FOLLOWING_POSTS_REQUEST,
     FETCH_FOLLOWING_POSTS_SUCCESS,
     FETCH_FOLLOWING_POSTS_FAILURE,
+    ADD_CHAT_USER,
   } from "./ActionType";
   
   const initialState = {
@@ -18,6 +19,7 @@ import {
     loading: false,
     error: null,
     followActionStatus: null,
+    chatUsers: [],
   };
   
   const followReducer = (state = initialState, action) => {
@@ -34,10 +36,17 @@ import {
           following: action.payload.following,
         };
   
-        case CREATE_FOLLOWER_SUCCESS:
+      case CREATE_FOLLOWER_SUCCESS:
           return { ...state, loading: false, following: action.payload };
         
-  
+      case ADD_CHAT_USER:
+        const alreadyExists = state.chatUsers.find(u => u.id === action.payload.id);
+        if (alreadyExists) return state;
+        return {
+          ...state,
+          chatUsers: [...state.chatUsers, action.payload],
+        };
+
       case GET_FOLLOWER_FAILURE:
       case CREATE_FOLLOWER_FAILURE:
         return { ...state, loading: false, error: action.payload };

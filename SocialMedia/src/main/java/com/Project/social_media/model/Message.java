@@ -35,6 +35,8 @@ public class Message {
 	
 	private MessageType messageSide; //means sender or receiver
 	
+	private boolean isRead = false;
+	
 	public Long getId() {
 		return id;
 	}
@@ -89,6 +91,14 @@ public class Message {
 
 	public void setMessageSide(MessageType messageSide) {
 		this.messageSide = messageSide;
+	}
+
+	public boolean isRead() {
+		return isRead;
+	}
+
+	public void setRead(boolean isRead) {
+		this.isRead = isRead;
 	}
 	
 	
