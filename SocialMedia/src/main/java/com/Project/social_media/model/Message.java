@@ -1,6 +1,7 @@
 package com.Project.social_media.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -34,6 +35,13 @@ public class Message {
 	private MessageType type;
 	
 	private MessageType messageSide; //means sender or receiver
+	
+	
+	@ManyToOne
+	@JoinColumn(name = "postId") // This will create a foreign key in Message table
+	@JsonIgnoreProperties({"messages", "likes", "comments", "user"})
+	private Post post;
+
 	
 	private boolean isRead = false;
 	
@@ -99,6 +107,14 @@ public class Message {
 
 	public void setRead(boolean isRead) {
 		this.isRead = isRead;
+	}
+
+	public Post getPost() {
+		return post;
+	}
+
+	public void setPost(Post post) {
+		this.post = post;
 	}
 	
 	

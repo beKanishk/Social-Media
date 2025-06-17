@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.Project.social_media.model.Message;
 import com.Project.social_media.model.MessageType;
 import com.Project.social_media.model.Post;
+import com.Project.social_media.model.PostDTO;
 import com.Project.social_media.model.User;
 import com.Project.social_media.repository.MessageRepository;
 import com.Project.social_media.repository.PostRepository;
@@ -49,54 +50,69 @@ public class MessageService implements MessageServiceInterface{
 			response.setTimestamp(message.getCreatedAt());
 			response.setSenderName(message.getSender().getName());
 			response.setRead(message.isRead());
-			response.setSenderId(message.getSender().getId());			
+			response.setSenderId(message.getSender().getId());
+			if(message.getPost() != null) {
+				Post post = message.getPost();
+				response.setPostId(post.getId());
+				response.setPostImageURL(post.getImageUrl());
+				response.setReceiverId(receiverId);
+				response.setType(MessageType.POST);
+			}
 			messageResponses.add(response);
 		}
 		return messageResponses;
 	}
 	
 	public MessageResponse handleIncomingMessage(String email, MessageRequest msg) throws Exception {
-		User sender = userService.findUserByEmail(email);
+		System.out.println("Message Request" + msg);
+	    User sender = userService.findUserByEmail(email);
 	    User receiver = userService.findUserById(msg.getReceiverId());
-
+	    
+	    
 	    Message message = new Message();
 	    message.setSender(sender);
 	    message.setReceiver(receiver);
-	    message.setContent(msg.getContent());
 	    message.setCreatedAt(LocalDateTime.now().toString());
 	    message.setType(msg.getType());
 	    message.setMessageSide(msg.getMessageSide());
 	    message.setRead(false);
-	   
-	    
+
+	    // Default content
+	    String content = msg.getContent();
+
+	    // 👇 Handle POST message properly
+	    Post sharedPost = null;
 	    if (msg.getType() == MessageType.POST && msg.getPostId() != null) {
-	        Optional<Post> post = postRepository.findById(msg.getPostId());
-	        message.setContent("Shared a post: " + post.get().getContent());
-	    } else {
-	        message.setContent(msg.getContent());
+	        Optional<Post> postOpt = postRepository.findById(msg.getPostId());
+	        if (postOpt.isPresent()) {
+	            sharedPost = postOpt.get();
+	            content = "Shared a post: " + sharedPost.getContent(); // ✅ Set fallback message
+	            message.setPost(sharedPost); // ✅ Save full Post in DB if needed
+	            message.setType(MessageType.POST);
+	        }
 	    }
-	    
+
+	    message.setContent(content);
 	    messageRepository.save(message);
 
+	    // ✅ Prepare Response
 	    MessageResponse response = new MessageResponse();
-	    response.setContent(message.getContent());
+	    response.setContent(content);
 	    response.setTimestamp(message.getCreatedAt());
 	    response.setSenderName(sender.getName());
 	    response.setSenderId(sender.getId());
 	    response.setReceiverId(receiver.getId());
-	    
-	    if (msg.getType() == MessageType.POST && msg.getPostId() != null) {
-	    	Optional<Post> post = postRepository.findById(msg.getPostId());
-	    	if(post.get() != null) {
-	    		response.setPostId(msg.getPostId());
-		        response.setPostImageURL(post.get().getImageUrl());
-		        response.setPost(post.get());
-	    	}
-	        
+	    response.setRead(false);
+
+	    if (sharedPost != null) {
+	        response.setPostId(sharedPost.getId());
+	        response.setPost(new PostDTO(sharedPost));
+	        response.setPostImageURL(sharedPost.getImageUrl());
 	    }
-	    
+
 	    return response;
 	}
+
 
 	
 	public String saveMessage(String jwt, MessageRequest request) throws Exception {

@@ -40,7 +40,11 @@ public class MessageRequest {
 		this.messageSide = messageSide;
 	}
 	
-	
+	@Override
+	public String toString() {
+		return "MessageRequest [content=" + content + ", receiverId=" + receiverId + ", type=" + type + ", messageSide="
+				+ messageSide + ", postId=" + postId + "]";
+	}
 	
 	
 }

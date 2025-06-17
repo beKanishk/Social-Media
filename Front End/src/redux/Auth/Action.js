@@ -44,6 +44,7 @@ export const login = (userData) => async (dispatch) => {
 
         if (user.jwt) {
             dispatch({ type: LOGIN_SUCCESS, payload: user.jwt });
+            dispatch(getUser(user.jwt));
             localStorage.setItem("jwt", user.jwt);
             userData.navigate("/home")
             // console.log("JWT stored in localStorage:", user.jwt); // 🟢 Check if stored

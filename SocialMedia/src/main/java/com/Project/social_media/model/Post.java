@@ -3,6 +3,7 @@ package com.Project.social_media.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.CascadeType;
@@ -36,6 +37,11 @@ public class Post {
 
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Likes> likes = new ArrayList<>();
+	
+	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonIgnore // prevent recursion
+	private List<Message> messages = new ArrayList<>();
+
 
 	public List<Likes> getLikes() {
 		return likes;

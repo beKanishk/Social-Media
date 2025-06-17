@@ -7,13 +7,6 @@ const PrivateRoute = ({ children }) => {
     const dispatch = useDispatch()
     const { user } = useSelector((state) => state.auth);
 
-    useEffect(() => {
-        const token = localStorage.getItem("jwt");
-        if (token) {
-            dispatch(getUser(token));
-        }
-    }, [dispatch]);
-
     return user ? children : <Navigate to="/" />;
 };
 

@@ -5,5 +5,6 @@ public enum MessageType {
 	RECEIVE,
 	TEXT,
 	IMAGE,
-	VIDEO, POST
+	VIDEO, 
+	POST
 }

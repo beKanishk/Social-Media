@@ -1,6 +1,12 @@
 package com.Project.social_media.response;
 
-import com.Project.social_media.model.Post;
+
+
+import com.Project.social_media.model.MessageType;
+import com.Project.social_media.model.PostDTO;
+
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 public class MessageResponse {
 	private String content;
@@ -8,12 +14,14 @@ public class MessageResponse {
 	private String senderName;
 	private Long postId;
 	private String postImageURL;
-	private Post post;
+	private PostDTO post;
 	private boolean isRead;
 	private Long senderId;
 	private Long receiverId;
 	private String senderUserName;
-
+	
+	@Enumerated(EnumType.STRING)
+	private MessageType type;
 	
 	public Long getSenderId() {
 		return senderId;
@@ -63,10 +71,10 @@ public class MessageResponse {
 	public void setPostImageURL(String postImageURL) {
 		this.postImageURL = postImageURL;
 	}
-	public Post getPost() {
+	public PostDTO getPost() {
 		return post;
 	}
-	public void setPost(Post post) {
+	public void setPost(PostDTO post) {
 		this.post = post;
 	}
 	public boolean isRead() {
@@ -80,5 +88,11 @@ public class MessageResponse {
 	}
 	public void setReceiverId(Long receiverId) {
 		this.receiverId = receiverId;
+	}
+	public MessageType getType() {
+		return type;
+	}
+	public void setType(MessageType post2) {
+		this.type = post2;
 	}
 }

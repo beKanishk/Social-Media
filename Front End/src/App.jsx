@@ -76,7 +76,7 @@ const App = () => {
     if (token) {
       dispatch(getUser(token));
     }
-  }, [dispatch]);
+  }, [dispatch, user]);
 
   const routes = (
     <Routes>

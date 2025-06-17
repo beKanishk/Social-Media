@@ -23,7 +23,6 @@ const ChatWindow = ({ receiverId }) => {
       localStorage.removeItem("activeChatId");
     };
   }, [receiverId]);
-  console.log("Messages:", messages);
   
   useEffect(() => {
     if (receiverId) {
@@ -33,7 +32,6 @@ const ChatWindow = ({ receiverId }) => {
 
   useEffect(() => {
     dispatch(getUser(jwt));
-    console.log("User: ", user);
     
   }, [dispatch]);
 
@@ -43,6 +41,7 @@ const ChatWindow = ({ receiverId }) => {
         const res = await axios.get(`http://localhost:8080/api/chat/messages/${receiverId}`, {
           headers: { Authorization: `Bearer ${jwt}` },
         });
+        console.log("Message :", res.data);
         
         dispatch(setMessages(res.data));
       } catch (err) {
@@ -90,6 +89,7 @@ const ChatWindow = ({ receiverId }) => {
 
     setContent("");
   };
+  
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -121,7 +121,24 @@ const ChatWindow = ({ receiverId }) => {
                   ? "bg-indigo-500 text-white rounded-br-none"
                   : "bg-white text-gray-900 rounded-bl-none"
               }`}>
-                {msg.content}
+                {msg.type === "POST" ? (
+                  <div className="border rounded-md p-2 mt-1 bg-gray-100 dark:bg-gray-700">
+                    <p className="text-sm font-medium text-gray-800 dark:text-white mb-1">Shared a post:</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">{msg.content}</p>
+                    {msg.postImageURL && (
+                      <img
+                        src={`http://localhost:8080${msg.postImageURL}`}
+                        alt="Shared Post"
+                        className="w-full max-h-60 object-cover rounded"
+                      />
+                    )}
+                  </div>
+                ) : msg.type === "POST" ? (
+                  <div className="text-red-400 italic">⚠️ Failed to load shared post</div>
+                ) : (
+                  <div>{msg.content}</div>
+                )}
+
               </div>
             </div>
           );
