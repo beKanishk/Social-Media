@@ -18,6 +18,7 @@ const FollowerPost = () => {
   const { stompClient, connected } = useContext(WebSocketContext);
   const [postToShare, setPostToShare] = useState(null);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [hasFetched, setHasFetched] = useState(false);
 
   const jwt = localStorage.getItem("jwt");
 
@@ -25,8 +26,14 @@ const FollowerPost = () => {
   if (!user) return null;
 
   useEffect(() => {
-    dispatch(fetchFollowingPosts(jwt));
-  }, [dispatch, jwt]);
+  if (!hasFetched) {
+    const token = localStorage.getItem("jwt");
+    if (token) {
+      dispatch(fetchFollowingPosts(token));
+      setHasFetched(true);
+    }
+  }
+}, [hasFetched, dispatch]);
 
   useEffect(() => {
     posts.forEach((post) => {

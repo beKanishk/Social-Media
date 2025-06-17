@@ -65,6 +65,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import { getUser } from './redux/Auth/Action';
 import WebSocketProvider from './utils/WebSocketContext';
+import { getFollowersAndFollowing } from './redux/Follower/Action';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -77,6 +78,15 @@ const App = () => {
       dispatch(getUser(token));
     }
   }, [dispatch, user]);
+  const jwt = localStorage.getItem("jwt");
+  useEffect(() => {
+    
+    if (jwt) {
+      dispatch(getFollowersAndFollowing(jwt));
+    }
+  }, [dispatch, jwt]);
+
+
 
   const routes = (
     <Routes>
