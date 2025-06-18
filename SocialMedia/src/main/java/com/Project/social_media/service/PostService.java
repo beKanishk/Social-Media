@@ -1,7 +1,9 @@
 package com.Project.social_media.service;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.io.IOException;
@@ -9,8 +11,17 @@ import java.nio.file.*;
 import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import com.Project.social_media.model.Followers;
 import com.Project.social_media.model.Post;
@@ -31,6 +42,8 @@ public class PostService implements PostServiceInterface{
 	@Autowired
 	private PostRepository postRepository;
 	
+	@Value("${imgbb.api.key}")
+    private String imgbbApiKey;
 	
 	private static final String UPLOAD_DIR = "uploads/posts/";
 	
@@ -175,11 +188,13 @@ public class PostService implements PostServiceInterface{
 		String imageUrl = null;
 
         if (image != null && !image.isEmpty()) {
-            String fileName = UUID.randomUUID().toString() + "_" + image.getOriginalFilename();
-            Path filePath = Paths.get(UPLOAD_DIR + fileName);
-            Files.createDirectories(filePath.getParent());
-            Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-            imageUrl = "/" + UPLOAD_DIR + fileName;
+//            String fileName = UUID.randomUUID().toString() + "_" + image.getOriginalFilename();
+//            Path filePath = Paths.get(UPLOAD_DIR + fileName);
+//            Files.createDirectories(filePath.getParent());
+//            Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+//            imageUrl = "/" + UPLOAD_DIR + fileName;
+        	imageUrl = uploadToImgBB(image);
+        	System.out.println("Image url");
         }
 
         User user = userService.findUserProfileByJwt(jwt);
@@ -191,6 +206,35 @@ public class PostService implements PostServiceInterface{
 
         return postRepository.save(post);
 	}
+	
+	private String uploadToImgBB(MultipartFile image) throws IOException {
+        RestTemplate restTemplate = new RestTemplate();
+
+        // Convert image to Base64
+        byte[] imageBytes = image.getBytes();
+        String base64Image = Base64.getEncoder().encodeToString(imageBytes);
+
+        // Prepare request body
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("key", imgbbApiKey);
+        body.add("image", base64Image);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(body, headers);
+
+        // Send POST request
+        String imgbbUrl = "https://api.imgbb.com/1/upload";
+        ResponseEntity<Map> response = restTemplate.postForEntity(imgbbUrl, requestEntity, Map.class);
+
+        if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+            Map data = (Map) response.getBody().get("data");
+            return data.get("url").toString(); // public image URL
+        } else {
+            throw new RuntimeException("Failed to upload image to Imgbb");
+        }
+    }
 	
 	public PostResponse updatePost(String content, MultipartFile image, Long postId) throws IOException {
 	    Optional<Post> optionalPost = postRepository.findById(postId);

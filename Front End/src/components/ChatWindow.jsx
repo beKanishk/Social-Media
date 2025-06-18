@@ -131,7 +131,7 @@ const ChatWindow = ({ receiverId }) => {
                       <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">{msg.content}</p>
                       {msg.postImageURL && (
                         <img
-                          src={`http://localhost:8080${msg.postImageURL}`}
+                          src={`${msg.postImageURL}`}
                           alt="Shared Post"
                           className="w-full max-h-60 object-cover rounded"
                         />

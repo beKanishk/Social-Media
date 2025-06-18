@@ -123,7 +123,7 @@ const FollowerPost = () => {
 
                 {post.imageUrl && (
                   <img
-                    src={`http://localhost:8080${post.imageUrl}`}
+                    src={`${post.imageUrl}`}
                     alt="Post"
                     className="rounded-lg w-full max-h-80 object-cover mb-3"
                   />

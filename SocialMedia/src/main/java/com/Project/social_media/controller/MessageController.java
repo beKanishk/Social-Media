@@ -59,6 +59,7 @@ public class MessageController {
         chatUsers.remove(user); // remove self if present
         return new ResponseEntity<>(new ArrayList<>(chatUsers), HttpStatus.OK);
     }
+    
     @GetMapping("/chat/users/{userId}")
     public ResponseEntity<User> addChatUsers(@RequestHeader("Authorization") String jwt, @PathVariable Long userId) throws Exception {
         User user = userService.findUserById(userId);
@@ -68,7 +69,7 @@ public class MessageController {
     
     @PutMapping("/chat/mark-read/{senderId}")
     public ResponseEntity<String> markMessagesAsRead(@RequestHeader("Authorization") String jwt, @PathVariable Long senderId) throws Exception {
-    	System.out.println("Mark message called");
+//    	System.out.println("Mark message called");
         messageService.markMessagesAsRead(jwt, senderId);
         return ResponseEntity.ok("Marked as read");
     }

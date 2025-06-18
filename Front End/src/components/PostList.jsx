@@ -63,7 +63,7 @@ const PostList = () => {
 
               {post.imageUrl && (
                 <img
-                  src={`http://localhost:8080${post.imageUrl}`}
+                  src={`${post.imageUrl}`}
                   alt="Post"
                   className="mt-4 rounded-lg max-h-96 w-full object-cover border border-gray-300 dark:border-gray-600"
                 />
