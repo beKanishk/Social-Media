@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.Project.social_media.configuration.JwtProvider;
 import com.Project.social_media.model.User;
+import com.Project.social_media.model.UserDetailsDTO;
 import com.Project.social_media.repository.UserRepository;
 
 
@@ -31,7 +32,6 @@ public class UserService {
 	    return userRepository.findByUserNameContainingIgnoreCase(query);
 	}
 
-	
 	public User findByUsername(String userName) throws Exception {
 		User user = userRepository.findByUserName(userName);
 		
@@ -60,5 +60,22 @@ public class UserService {
 			throw new Exception("User not found exception.");
 		}
 		return user.get();
+	}
+	
+	public User editUserDetails(User user, UserDetailsDTO userDetailsDTO) {
+		if(userDetailsDTO.getBio() != null) {
+			user.setBio(userDetailsDTO.getBio());
+		}
+		if(userDetailsDTO.getName() != null) {
+			user.setName(userDetailsDTO.getName());
+		}
+		if(userDetailsDTO.getUserName() != null) {
+			user.setUserName(userDetailsDTO.getUserName());
+		}
+		if(userDetailsDTO.getUserEmail() != null) {
+			user.setUserEmail(userDetailsDTO.getUserEmail());
+		}
+		userRepository.save(user);
+		return user;
 	}
 }

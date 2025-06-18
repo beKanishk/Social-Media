@@ -105,47 +105,49 @@ const ChatWindow = ({ receiverId }) => {
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
-        {messages.map((msg, i) => {
-          const isSender = msg?.senderId === user?.id;
-
-          return (
-            <div key={i} className={`flex flex-col ${isSender ? "items-end" : "items-start"}`}>
-              <span className="text-xs text-gray-400 mb-1 px-1">
-                {isSender ? "You" : msg.senderName}
-                {!isSender && !msg?.read && (
-                  <span className="ml-2 text-red-500 font-semibold">• New</span>
-                )}
-              </span>
-              <div className={`max-w-xs px-4 py-2 text-sm rounded-lg shadow-sm ${
-                isSender
-                  ? "bg-indigo-500 text-white rounded-br-none"
-                  : "bg-white text-gray-900 rounded-bl-none"
-              }`}>
-                {msg.type === "POST" ? (
-                  <div className="border rounded-md p-2 mt-1 bg-gray-100 dark:bg-gray-700">
-                    <p className="text-sm font-medium text-gray-800 dark:text-white mb-1">Shared a post:</p>
-                    <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">{msg.content}</p>
-                    {msg.postImageURL && (
-                      <img
-                        src={`http://localhost:8080${msg.postImageURL}`}
-                        alt="Shared Post"
-                        className="w-full max-h-60 object-cover rounded"
-                      />
-                    )}
-                  </div>
-                ) : msg.type === "POST" ? (
-                  <div className="text-red-400 italic">⚠️ Failed to load shared post</div>
-                ) : (
-                  <div>{msg.content}</div>
-                )}
-
+        {messages.length === 0 ? (
+          <div className="text-center text-gray-500 dark:text-gray-400 italic mt-20">
+            No messages yet. Start the conversation!
+          </div>
+        ) : (
+          messages.map((msg, i) => {
+            const isSender = msg?.senderId === user?.id;
+            return (
+              <div key={i} className={`flex flex-col ${isSender ? "items-end" : "items-start"}`}>
+                <span className="text-xs text-gray-400 mb-1 px-1">
+                  {isSender ? "You" : msg.senderName}
+                  {!isSender && !msg?.read && (
+                    <span className="ml-2 text-red-500 font-semibold">• New</span>
+                  )}
+                </span>
+                <div className={`max-w-xs px-4 py-2 text-sm rounded-lg shadow-sm ${
+                  isSender
+                    ? "bg-indigo-500 text-white rounded-br-none"
+                    : "bg-white text-gray-900 rounded-bl-none"
+                }`}>
+                  {msg.type === "POST" ? (
+                    <div className="border rounded-md p-2 mt-1 bg-gray-100 dark:bg-gray-700">
+                      <p className="text-sm font-medium text-gray-800 dark:text-white mb-1">Shared a post:</p>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">{msg.content}</p>
+                      {msg.postImageURL && (
+                        <img
+                          src={`http://localhost:8080${msg.postImageURL}`}
+                          alt="Shared Post"
+                          className="w-full max-h-60 object-cover rounded"
+                        />
+                      )}
+                    </div>
+                  ) : (
+                    <div>{msg.content}</div>
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        })}
-
+            );
+          })
+        )}
         <div ref={messagesEndRef} />
       </div>
+
 
       <div className="border-t border-gray-300 dark:border-gray-700 p-3 flex items-center gap-3 bg-white dark:bg-gray-900">
         <textarea
