@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchPosts } from "../redux/Post/Action";
+import { deletePost, fetchPosts } from "../redux/Post/Action";
 import CommentSection from "./CommentSection";
 import { MessageCircle, ThumbsUp } from "lucide-react";
 import { fetchLikes, toggleLike } from "../redux/Likes/Action";
@@ -86,6 +86,12 @@ const PostList = () => {
                 >
                   <MessageCircle className="w-4 h-4" />
                   <span>Comments</span>
+                </button>
+                <button
+                  onClick={() => dispatch(deletePost(post.id))}
+                  className="text-sm text-red-500 hover:underline"
+                >
+                  🗑️ Delete
                 </button>
               </div>
             </div>

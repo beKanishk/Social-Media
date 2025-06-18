@@ -6,6 +6,9 @@ import {
   CREATE_POST_REQUEST,
   CREATE_POST_SUCCESS,
   CREATE_POST_FAILURE,
+  DELETE_POST_REQUEST,
+  DELETE_POST_SUCCESS,
+  DELETE_POST_FAILURE,
 } from './ActionType';
 
 const API_URL = 'http://localhost:8080/api/post';
@@ -53,6 +56,22 @@ export const createPost = (formData, jwt) => async (dispatch) => {
     console.error("Post creation failed:", error);
     dispatch({
       type: CREATE_POST_FAILURE,
+      payload: error.response?.data?.message || error.message,
+    });
+  }
+};
+
+export const deletePost = (postId) => async (dispatch) => {
+  dispatch({ type: DELETE_POST_REQUEST });
+  try {
+    const jwt = localStorage.getItem("jwt");
+    await axios.delete(`${API_URL}/delete/${postId}`, {
+      headers: { Authorization: `Bearer ${jwt}` },
+    });
+    dispatch({ type: DELETE_POST_SUCCESS, payload: postId });
+  } catch (error) {
+    dispatch({
+      type: DELETE_POST_FAILURE,
       payload: error.response?.data?.message || error.message,
     });
   }
