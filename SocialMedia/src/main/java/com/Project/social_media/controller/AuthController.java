@@ -9,6 +9,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +29,9 @@ public class AuthController {
 	
 	@Autowired
 	CustomerUserDetailsService customerUserDetailsService;
+
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 	
 	@PostMapping("/signup")
 	public ResponseEntity<AuthResponse> registerUser(@RequestBody User user) throws Exception{
@@ -47,14 +51,18 @@ public class AuthController {
 		newUser.setBio(user.getBio());
 		newUser.setCreatedAt(LocalDateTime.now().toString());
 		newUser.setName(user.getName());
+		newUser.setAbout(user.getAbout());
 		newUser.setUserEmail(user.getUserEmail());
-		newUser.setPassword(user.getPassword());
+
+		// Hash the password before saving
+		newUser.setPassword(passwordEncoder.encode(user.getPassword()));
+
 		newUser.setUserName(user.getUserName());
 		
 		User savedUser = userRepository.save(newUser);
 		
 		Authentication authentication = new UsernamePasswordAuthenticationToken(user.getUserEmail(), user.getPassword());
-		
+
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		String jwt = JwtProvider.generateToken(authentication);
 		
@@ -86,19 +94,38 @@ public class AuthController {
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 	
+//	private Authentication authenticate(String userEmail, String userPassword) {
+//		UserDetails userDetails = customerUserDetailsService.loadUserByUsername(userEmail);
+//
+//		if (userDetails == null) {
+//			throw new BadCredentialsException("inavlid username");
+//		}
+//
+//		if (!userPassword.equals(userDetails.getPassword())) {
+//			throw new BadCredentialsException("invalid password");
+//		}
+//
+////		return new UsernamePasswordAuthenticationToken(userPassword, userDetails, userDetails.getAuthorities());
+//		return new UsernamePasswordAuthenticationToken(userDetails.getUsername(), null, userDetails.getAuthorities());
+//
+//	}
+
 	private Authentication authenticate(String userEmail, String userPassword) {
 		UserDetails userDetails = customerUserDetailsService.loadUserByUsername(userEmail);
 
 		if (userDetails == null) {
-			throw new BadCredentialsException("inavlid username");
+			throw new BadCredentialsException("Invalid username");
 		}
 
-		if (!userPassword.equals(userDetails.getPassword())) {
-			throw new BadCredentialsException("invalid password");
+		// Use passwordEncoder to compare raw and encoded password
+		if (!passwordEncoder.matches(userPassword, userDetails.getPassword())) {
+			throw new BadCredentialsException("Invalid password");
 		}
 
-//		return new UsernamePasswordAuthenticationToken(userPassword, userDetails, userDetails.getAuthorities());
-		return new UsernamePasswordAuthenticationToken(userDetails.getUsername(), null, userDetails.getAuthorities());
-
+		return new UsernamePasswordAuthenticationToken(
+				userDetails.getUsername(),
+				null,
+				userDetails.getAuthorities()
+		);
 	}
 }

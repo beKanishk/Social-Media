@@ -24,9 +24,11 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import com.Project.social_media.model.Followers;
+import com.Project.social_media.model.ImageUpload;
 import com.Project.social_media.model.Post;
 import com.Project.social_media.model.User;
 import com.Project.social_media.repository.FollowerRepository;
+import com.Project.social_media.repository.ImageUploadRepository;
 import com.Project.social_media.repository.PostRepository;
 import com.Project.social_media.repository.UserRepository;
 import com.Project.social_media.request.PostRequest;
@@ -42,32 +44,15 @@ public class PostService implements PostServiceInterface{
 	@Autowired
 	private PostRepository postRepository;
 	
+	@Autowired
+	private ImageUploadRepository imageUploadRepository;
+	
 	@Value("${imgbb.api.key}")
     private String imgbbApiKey;
 	
-	private static final String UPLOAD_DIR = "uploads/posts/";
-	
-	@Override
-	public PostResponse createPost(PostRequest postRequest, String jwt) throws Exception {
-		User user = userService.findUserProfileByJwt(jwt);
-		
-		Post newPost = new Post();
-		newPost.setContent(postRequest.getContent());
-		newPost.setUser(user);
-		newPost.setImageUrl(postRequest.getImageUrl());
-		
-		Post savedPost = postRepository.save(newPost);
-		if(savedPost != null) {
-			PostResponse response = new PostResponse();
-			response.setMessage("Post created successfuly.");
-			return response;
-		}
-		
-		PostResponse response = new PostResponse();
-		response.setMessage("Error in creating post.");
-		
-		return response;
-	}
+	@Value("${image.url}")
+	private String imgbbUrl;
+
 
 	@Override
 	public PostResponse deletePost(String jwt, Long postId) throws Exception {
@@ -75,6 +60,10 @@ public class PostService implements PostServiceInterface{
 		Optional<Post> post = postRepository.findById(postId);
 
 		if (post.isPresent()) {
+			ImageUpload postImage =  imageUploadRepository.findByPost(post.get());
+			if(postImage != null){
+				imageUploadRepository.delete(postImage);
+			}
 		    postRepository.delete(post.get());
 		} 
 		else {
@@ -139,25 +128,12 @@ public class PostService implements PostServiceInterface{
 		User user = userService.findUserProfileByJwt(jwt);
 		
 		List<Post> posts = postRepository.findAllByUserId(user.getId());
-		
+
 		return posts;
 	}
 
 	
-//	public List<List<Post>> getFollowerPosts(String jwt) throws Exception{
-//		List<FollowerResponse> followers = followerService.getFollowings(jwt);
-//		List<List<Post>> posts = new ArrayList<>();
-//		
-//		for(FollowerResponse follower : followers) {
-//			User user = userRepository.findByUserName(follower.getUserName());
-//			
-//			List<Post> post = postRepository.findAllByUserId(user.getId());
-//			if(post != null) {
-//				posts.add(post);
-//			}
-//		}
-//		return posts;
-//	}
+
 	
 	public List<Post> getFollowerPosts(String jwt) throws Exception {
 	    User user = userService.findUserProfileByJwt(jwt);
@@ -183,58 +159,74 @@ public class PostService implements PostServiceInterface{
 		return post.orElseThrow(() -> new RuntimeException("Post not found"));
 	}
 
-	@Override
+
 	public Post createPost(String content, MultipartFile image, String jwt) throws Exception {
-		String imageUrl = null;
+		User user = userService.findUserProfileByJwt(jwt);
 
-        if (image != null && !image.isEmpty()) {
-//            String fileName = UUID.randomUUID().toString() + "_" + image.getOriginalFilename();
-//            Path filePath = Paths.get(UPLOAD_DIR + fileName);
-//            Files.createDirectories(filePath.getParent());
-//            Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-//            imageUrl = "/" + UPLOAD_DIR + fileName;
-        	imageUrl = uploadToImgBB(image);
-        	System.out.println("Image url");
-        }
+		Post post = new Post();
+		post.setUser(user);
+		post.setContent(content);
+		post.setCreatedAt(LocalDateTime.now().toString());
 
-        User user = userService.findUserProfileByJwt(jwt);
-        Post post = new Post();
-        post.setContent(content);
-        post.setImageUrl(imageUrl);
-        post.setUser(user);
-        post.setCreatedAt(LocalDateTime.now().toString());
+		// Save post first to generate an ID
+		post = postRepository.save(post);
 
-        return postRepository.save(post);
+		if (image != null && !image.isEmpty()) {
+			ImageUpload imageUpload = uploadToImgBB(image);
+			imageUpload.setPost(post);
+
+			ImageUpload savedImageUpload = imageUploadRepository.save(imageUpload);
+
+			post.setImageUrl(savedImageUpload.getImageUrl());
+			post.setImageUpload(savedImageUpload);
+
+			//  Save again with image URL set
+			post = postRepository.save(post);
+		}
+
+		return post;
 	}
-	
-	private String uploadToImgBB(MultipartFile image) throws IOException {
-        RestTemplate restTemplate = new RestTemplate();
 
-        // Convert image to Base64
-        byte[] imageBytes = image.getBytes();
+
+
+
+	private ImageUpload uploadToImgBB(MultipartFile image) {
+	    RestTemplate restTemplate = new RestTemplate();
+
+        byte[] imageBytes = null;
+        try {
+            imageBytes = image.getBytes();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read image bytes", e);
+        }
         String base64Image = Base64.getEncoder().encodeToString(imageBytes);
 
-        // Prepare request body
-        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("key", imgbbApiKey);
-        body.add("image", base64Image);
+	    MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+	    body.add("key", imgbbApiKey);
+	    body.add("image", base64Image);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+	    HttpHeaders headers = new HttpHeaders();
+	    headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(body, headers);
+	    HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(body, headers);
+	    
 
-        // Send POST request
-        String imgbbUrl = "https://api.imgbb.com/1/upload";
-        ResponseEntity<Map> response = restTemplate.postForEntity(imgbbUrl, requestEntity, Map.class);
+	    ResponseEntity<Map> response = restTemplate.postForEntity(imgbbUrl, requestEntity, Map.class);
 
-        if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-            Map data = (Map) response.getBody().get("data");
-            return data.get("url").toString(); // public image URL
-        } else {
-            throw new RuntimeException("Failed to upload image to Imgbb");
-        }
-    }
+	    if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+	        Map data = (Map) response.getBody().get("data");
+
+	        ImageUpload upload = new ImageUpload();
+	        upload.setImageUrl(data.get("url").toString());
+	        upload.setDeleteUrl(data.get("delete_url").toString());
+	        
+
+	        return upload;
+	    } else {
+	        throw new RuntimeException("Failed to upload image to ImgBB");
+	    }
+	}
+
 	
 	public PostResponse updatePost(String content, MultipartFile image, Long postId) throws IOException {
 	    Optional<Post> optionalPost = postRepository.findById(postId);

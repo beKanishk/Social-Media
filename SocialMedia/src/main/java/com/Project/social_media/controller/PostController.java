@@ -40,7 +40,11 @@ public class PostController {
                                         @RequestParam(required = false) MultipartFile image,
                                         @RequestHeader("Authorization") String jwt) {
         try {
-            Post savedPost = postService.createPost(content, image, jwt);
+			System.out.println("Content: " + content);
+			System.out.println("Image: " + (image != null ? image.getOriginalFilename() : "null"));
+			System.out.println("JWT: " + jwt);
+			Post savedPost = postService.createPost(content, image, jwt);
+			System.out.println("Post service executed");
             return ResponseEntity.ok(savedPost);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Failed to create post: " + e.getMessage());

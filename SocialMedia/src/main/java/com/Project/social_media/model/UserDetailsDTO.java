@@ -5,6 +5,7 @@ public class UserDetailsDTO {
 	private String userName;
 	private String bio;
 	private String userEmail;
+	private String about;
 	
 	public String getUserEmail() {
 		return userEmail;
@@ -29,6 +30,12 @@ public class UserDetailsDTO {
 	}
 	public void setBio(String bio) {
 		this.bio = bio;
+	}
+	public String getAbout() {
+		return about;
+	}
+	public void setAbout(String about) {
+		this.about = about;
 	}
 	
 	

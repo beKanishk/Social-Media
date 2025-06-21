@@ -19,6 +19,7 @@ public class MessageResponse {
 	private Long senderId;
 	private Long receiverId;
 	private String senderUserName;
+	private String senderProfileUrl;
 	
 	@Enumerated(EnumType.STRING)
 	private MessageType type;
@@ -94,5 +95,11 @@ public class MessageResponse {
 	}
 	public void setType(MessageType post2) {
 		this.type = post2;
+	}
+	public String getSenderProfileUrl() {
+		return senderProfileUrl;
+	}
+	public void setSenderProfileUrl(String senderProfileUrl) {
+		this.senderProfileUrl = senderProfileUrl;
 	}
 }

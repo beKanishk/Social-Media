@@ -1,6 +1,7 @@
 package com.Project.social_media.controller;
 
 import com.Project.social_media.model.Message;
+import com.Project.social_media.model.UnreadMessageDto;
 import com.Project.social_media.model.User;
 import com.Project.social_media.repository.MessageRepository;
 import com.Project.social_media.request.MessageRequest;
@@ -10,8 +11,10 @@ import com.Project.social_media.service.UserService;
 
 import java.net.http.HttpClient;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +75,23 @@ public class MessageController {
 //    	System.out.println("Mark message called");
         messageService.markMessagesAsRead(jwt, senderId);
         return ResponseEntity.ok("Marked as read");
+    }
+    
+    @GetMapping("/chat/unread")
+    public ResponseEntity<List<UnreadMessageDto>> getUnreadMessages(@RequestHeader("Authorization") String jwt) throws Exception {
+        User currentUser = userService.findUserProfileByJwt(jwt);
+
+        List<Message> unreadMessages = messageRepository.findAllByReceiverAndIsReadFalse(currentUser);
+
+        Map<Long, UnreadMessageDto> map = new HashMap<>();
+
+        for (Message m : unreadMessages) {
+            Long senderId = m.getSender().getId();
+            map.putIfAbsent(senderId, new UnreadMessageDto(m.getSender()));
+            map.get(senderId).incrementCount();
+        }
+
+        return ResponseEntity.ok(new ArrayList<>(map.values()));
     }
 
 }

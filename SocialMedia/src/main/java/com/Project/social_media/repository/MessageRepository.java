@@ -17,4 +17,5 @@ public interface MessageRepository extends JpaRepository<Message, Long>{
 	List<Message> findConversation(@Param("user1") User user1, @Param("user2") User user2);
 
 	public List<Message> findByReceiverAndSender(User receiver, User sender);
+	public List<Message> findAllByReceiverAndIsReadFalse(User currentUser);
 }

@@ -9,7 +9,6 @@ import com.Project.social_media.request.PostRequest;
 import com.Project.social_media.response.PostResponse;
 
 public interface PostServiceInterface {
-	public PostResponse createPost(PostRequest postRequest, String jwt) throws Exception;
 	
 	public PostResponse deletePost(String jwt, Long postId) throws Exception;
 	

@@ -6,6 +6,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -15,6 +16,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 
 @Entity
 public class Post {
@@ -41,7 +43,19 @@ public class Post {
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonIgnore // prevent recursion
 	private List<Message> messages = new ArrayList<>();
+	
+	@OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "image_upload_id")
+	@JsonIgnore
+    private ImageUpload imageUpload;
 
+	public ImageUpload getImageUpload() {
+		return imageUpload;
+	}
+
+	public void setImageUpload(ImageUpload imageUpload) {
+		this.imageUpload = imageUpload;
+	}
 
 	public List<Likes> getLikes() {
 		return likes;

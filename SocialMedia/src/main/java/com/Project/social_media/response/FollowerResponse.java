@@ -6,6 +6,7 @@ public class FollowerResponse {
 	private String name;
 	private Long userId;
 	private String userEmail;
+	private String profilePictureUrl;
 	
 	public String getUserName() {
 		return userName;
@@ -36,6 +37,12 @@ public class FollowerResponse {
 	}
 	public void setUserEmail(String userEmail) {
 		this.userEmail = userEmail;
+	}
+	public String getProfilePictureUrl() {
+		return profilePictureUrl;
+	}
+	public void setProfilePictureUrl(String profilePictureUrl) {
+		this.profilePictureUrl = profilePictureUrl;
 	} 
 
 }

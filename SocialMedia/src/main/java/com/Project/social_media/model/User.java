@@ -32,6 +32,8 @@ public class User {
 	private String bio;
 	private String createdAt;
 	private String name;
+	private String about;
+	private String profilePictureUrl;
 	
 	@Column(unique = true, nullable = false)
 	private String userEmail;
@@ -129,6 +131,22 @@ public class User {
 
 	public void setUserName(String userName) {
 		this.userName = userName;
+	}
+
+	public String getAbout() {
+		return about;
+	}
+
+	public void setAbout(String about) {
+		this.about = about;
+	}
+
+	public String getProfilePictureUrl() {
+		return profilePictureUrl;
+	}
+
+	public void setProfilePictureUrl(String profilePictureUrl) {
+		this.profilePictureUrl = profilePictureUrl;
 	}
 
 
