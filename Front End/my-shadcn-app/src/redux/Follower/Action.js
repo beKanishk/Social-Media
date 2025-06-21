@@ -42,41 +42,41 @@ export const getFollowersAndFollowing = (jwt) => async (dispatch) => {
     }
 };
 
-export const createFollower = (userName, jwt) => async (dispatch, getState) => {
-    dispatch({ type: CREATE_FOLLOWER_REQUEST });
+// export const createFollower = (userName, jwt) => async (dispatch, getState) => {
+//     dispatch({ type: CREATE_FOLLOWER_REQUEST });
   
-    try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}/api/follower/create/${userName}`,{
-          headers: { Authorization: `Bearer ${jwt}` }
-        }
-      );
+//     try {
+//       const response = await axios.get(
+//         `${import.meta.env.VITE_BACKEND_URL}/api/follower/create/${userName}`,{
+//           headers: { Authorization: `Bearer ${jwt}` }
+//         }
+//       );
   
-      const message = response.data;
+//       const message = response.data;
   
-      // Optimistically update following list
-      const { following } = getState().follow;
-      let updatedFollowing;
+//       // Optimistically update following list
+//       const { following } = getState().follow;
+//       let updatedFollowing;
   
-      if (message.includes("Unfollowed")) {
-        updatedFollowing = following.filter(user => user.userName !== userName);
-      } else {
-        const newUser = { userName }; // Add more info if available
-        updatedFollowing = [...following, newUser];
-      }
-      // console.log(updatedFollowing);
+//       if (message.includes("Unfollowed")) {
+//         updatedFollowing = following.filter(user => user.userName !== userName);
+//       } else {
+//         const newUser = { userName }; // Add more info if available
+//         updatedFollowing = [...following, newUser];
+//       }
+//       // console.log(updatedFollowing);
       
-      dispatch({ type: CREATE_FOLLOWER_SUCCESS, payload: updatedFollowing });
-    //   dispatch(getUser(jwt));
-    } catch (error) {
-      dispatch({
-        type: CREATE_FOLLOWER_FAILURE,
-        payload: error.response?.data?.message || error.message,
-      });
-    }
-  };
+//       dispatch({ type: CREATE_FOLLOWER_SUCCESS, payload: updatedFollowing });
+//     //   dispatch(getUser(jwt));
+//     } catch (error) {
+//       dispatch({
+//         type: CREATE_FOLLOWER_FAILURE,
+//         payload: error.response?.data?.message || error.message,
+//       });
+//     }
+//   };
 
-  export const fetchFollowingPosts = (jwt) => async (dispatch) => {
+export const fetchFollowingPosts = (jwt) => async (dispatch) => {
     dispatch({ type: FETCH_FOLLOWING_POSTS_REQUEST });
   
     try {
@@ -94,9 +94,9 @@ export const createFollower = (userName, jwt) => async (dispatch, getState) => {
         payload: error.response?.data?.message || error.message,
       });
     }
-  };
+};
 
-  export const addChatUser = (senderId) => async (dispatch, getState) => {
+export const addChatUser = (senderId) => async (dispatch, getState) => {
     try {
       const { follow } = getState();
       const existingUser = follow.chatUsers?.find(user => user.id === senderId);
@@ -116,3 +116,43 @@ export const createFollower = (userName, jwt) => async (dispatch, getState) => {
       console.error("Failed to fetch sender info:", error);
     }
 };
+
+export const createFollower = (userName, jwt) => async (dispatch, getState) => {
+  dispatch({ type: CREATE_FOLLOWER_REQUEST });
+
+  try {
+    const response = await axios.get(
+      `${import.meta.env.VITE_BACKEND_URL}/api/follower/create/${userName}`,
+      { headers: { Authorization: `Bearer ${jwt}` } }
+    );
+
+    const message = response.data;
+
+    // Optimistically update following
+    const { following } = getState().follow;
+    let updatedFollowing;
+    let isNowFollowing;
+
+    if (message.includes("Unfollowed")) {
+      // console.log("following", following);
+      
+      updatedFollowing = following.filter(user => user.userId !== userName);
+      isNowFollowing = false;
+    } else {
+      const newUser = { userName }; // Ideally add more user info
+      updatedFollowing = [...following, newUser];
+      isNowFollowing = true;
+    }
+
+    dispatch({ type: CREATE_FOLLOWER_SUCCESS, payload: updatedFollowing });
+
+    return isNowFollowing;
+  } catch (error) {
+    dispatch({
+      type: CREATE_FOLLOWER_FAILURE,
+      payload: error.response?.data?.message || error.message,
+    });
+    throw error;
+  }
+};
+

@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { getFollowersAndFollowing, createFollower } from '../redux/Follower/Action';
 import { getUser } from '../redux/Auth/Action';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
@@ -42,7 +43,7 @@ const Followers = ({ show, onHide }) => {
                   const isFollowing = follow.following.some(f => f.userName === follower.userName);
                   return (
                     <div key={index} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted transition">
-                      <div className="flex items-center gap-3">
+                      <Link to={`/user/${follower.userName}`} className="flex items-center gap-3" onClick={onHide}>
                         <Avatar className="w-8 h-8">
                           <img src={follower.profilePictureUrl || '/avatar.png'} alt={follower.name} className="w-8 h-8 rounded-full object-cover" />
                         </Avatar>
@@ -50,7 +51,7 @@ const Followers = ({ show, onHide }) => {
                           <div className="font-medium text-foreground">{follower.name}</div>
                           <div className="text-xs text-muted-foreground">@{follower.userName}</div>
                         </div>
-                      </div>
+                      </Link>
                       <Button
                         variant={isFollowing ? 'destructive' : 'outline'}
                         size="sm"

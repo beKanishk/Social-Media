@@ -51,23 +51,22 @@ const App = () => {
     } />
   );
 
-  const appContent = (
-    <Routes>
-      <Route path="/" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      {user ? privateRoutes : <Route path="*" element={<Login />} />}
-    </Routes>
-  );
-
   return (
     <>
       <ToastContainer position="top-right" autoClose={3000} />
-      {userEmail ? (
+      {userLoaded ? (
         <WebSocketProvider userEmail={userEmail}>
-          {appContent}
+          <Routes>
+            <Route path="/" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            {privateRoutes}
+            <Route path="*" element={user ? <Home /> : <Login />} />
+          </Routes>
         </WebSocketProvider>
       ) : (
-        appContent
+        <div className="flex justify-center items-center h-screen bg-background">
+          <div className="terminal-loader text-blue-500 text-5xl"></div>
+        </div>
       )}
     </>
   );

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
-import { createFollower } from '../redux/Follower/Action';
-import { fetchUserProfile, clearUserProfile } from '../redux/User/Action';
+import { createFollower, getFollowersAndFollowing } from '../redux/Follower/Action';
+import { fetchUserProfile, clearUserProfile, clearUserProfileState } from '../redux/User/Action';
 import { getUser } from '../redux/Auth/Action';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import { Avatar } from '@/components/ui/avatar';
@@ -19,45 +19,68 @@ const UserProfile = ({ userName: userNameProp, variant }) => {
   const params = useParams();
   const userName = userNameProp || params.userName;
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const { userProfile } = useSelector((state) => state.userProfile);
   const { user } = useSelector((state) => state.auth);
   const { loading } = useSelector((state) => state.follow);
   const { postLikes } = useSelector((state) => state.like);
-  const navigate = useNavigate();
-
-  const [isFollowing, setIsFollowing] = useState(false);
+  
   const [openComments, setOpenComments] = useState({});
+  const [optimisticIsFollowing, setOptimisticIsFollowing] = useState(null);
+  const [optimisticFollowerCount, setOptimisticFollowerCount] = useState(null);
 
   useEffect(() => {
-    dispatch(getUser(localStorage.getItem("jwt")));
-  }, [dispatch]);
-
-  useEffect(() => {
+    const jwt = localStorage.getItem("jwt");
     if (userName) {
       dispatch(fetchUserProfile(userName));
     }
+    if (jwt) {
+      dispatch(getUser(jwt));
+      dispatch(getFollowersAndFollowing(jwt));
+    }
+
+    // This cleanup function now dispatches the correct, synchronous action.
+    return () => {
+      dispatch(clearUserProfileState());
+    };
   }, [userName, dispatch]);
 
-  useEffect(() => {
-    if (user && userProfile) {
-      const following = user.following?.some(followingItem =>
-        userProfile.follower?.includes(followingItem.id)
-      );
-      // const following = userProfile.follower?.some(fId =>
-      //                     user.following?.includes(fId)
-      //                   );
-      setIsFollowing(following);
-    }
-  }, [user, userProfile]);
+  const isReady = user && userProfile;
+
+  const isFollowing = isReady 
+    ? (user.following?.some(followingItem => userProfile.follower?.some(followerItem => followerItem.id == followingItem))) 
+      || 
+      (user.following?.some(followingItem =>userProfile.follower?.includes(followingItem)))
+    : false;
+  
+  const displayIsFollowing = optimisticIsFollowing !== null ? optimisticIsFollowing : isFollowing;
+  const displayFollowerCount = optimisticFollowerCount !== null ? optimisticFollowerCount : userProfile?.follower?.length || 0;
 
   const handleFollowToggle = async () => {
-    const optimisticState = !isFollowing;
-    setIsFollowing(optimisticState);
+    if (!isReady) return;
+
+    setOptimisticIsFollowing(!isFollowing);
+    const currentFollowerCount = userProfile.follower?.length || 0;
+    setOptimisticFollowerCount(
+      isFollowing ? currentFollowerCount - 1 : currentFollowerCount + 1
+    );
+
+    const jwt = localStorage.getItem("jwt");
     try {
-      dispatch(createFollower(userName, localStorage.getItem("jwt")));
+      await dispatch(createFollower(userName, jwt));
     } catch (error) {
-      setIsFollowing(!optimisticState);
-      console.error("Follow/Unfollow failed:", error);
+      setOptimisticIsFollowing(isFollowing);
+      setOptimisticFollowerCount(currentFollowerCount);
+      console.error("Failed to follow/unfollow:", error);
+    } finally {
+      await Promise.all([
+        dispatch(getFollowersAndFollowing(jwt)),
+        dispatch(fetchUserProfile(userName)),
+        dispatch(getUser(jwt)),
+      ]);
+      setOptimisticIsFollowing(null);
+      setOptimisticFollowerCount(null);
     }
   };
 
@@ -100,18 +123,18 @@ const UserProfile = ({ userName: userNameProp, variant }) => {
                   <span className="text-muted-foreground text-sm group-hover:underline">@{userProfile?.userName}</span>
                 </div>
                 <div className="flex gap-3 mb-2">
-                  <Badge variant="secondary">{userProfile?.follower?.length || 0} Followers</Badge>
+                  <Badge variant="secondary">{displayFollowerCount} Followers</Badge>
                   <Badge variant="secondary">{userProfile?.following?.length || 0} Following</Badge>
                 </div>
                 <div className="text-muted-foreground text-sm mb-2">{userProfile?.bio}</div>
-                {user?.id !== userProfile?.id && (
+                {isReady && user?.id !== userProfile?.id && (
                   <Button
                     onClick={handleFollowToggle}
-                    disabled={loading}
-                    variant={isFollowing ? "destructive" : "default"}
+                    disabled={loading || optimisticIsFollowing !== null}
+                    variant={displayIsFollowing ? "destructive" : "default"}
                     className="mt-1"
                   >
-                    {isFollowing ? 'Unfollow' : 'Follow'}
+                    {displayIsFollowing ? 'Unfollow' : 'Follow'}
                   </Button>
                 )}
                 {user?.id === userProfile?.id && (
@@ -127,14 +150,14 @@ const UserProfile = ({ userName: userNameProp, variant }) => {
               </div>
             </CardHeader>
             <Separator />
-            {(isFollowing || user?.id === userProfile?.id) ? null : (
+            {(displayIsFollowing || user?.id === userProfile?.id) ? null : (
               <CardContent>
                 <div className="text-muted-foreground italic mt-4">Follow this user to view their posts.</div>
               </CardContent>
             )}
           </Card>
           {/* About Card */}
-          {(isFollowing || user?.id === userProfile?.id) && userProfile?.about && (
+          {(displayIsFollowing || user?.id === userProfile?.id) && userProfile?.about && (
             <Card className="rounded-xl border bg-card">
               <CardHeader>
                 <h3 className="text-base font-semibold text-foreground mb-1">About</h3>
@@ -146,7 +169,7 @@ const UserProfile = ({ userName: userNameProp, variant }) => {
             </Card>
           )}
           {/* Posts Card */}
-          {(isFollowing || user?.id === userProfile?.id) && userProfile?.posts?.length > 0 && (
+          {(displayIsFollowing || user?.id === userProfile?.id) && userProfile?.posts?.length > 0 && (
             <Card className="rounded-xl border bg-card">
               <CardHeader>
                 <h3 className="text-base font-semibold text-foreground mb-1">Posts</h3>
@@ -246,18 +269,18 @@ const UserProfile = ({ userName: userNameProp, variant }) => {
                   <span className="text-muted-foreground text-sm group-hover:underline">@{userProfile?.userName}</span>
                 </div>
                 <div className="flex gap-3 mb-2">
-                  <Badge variant="secondary">{userProfile?.follower?.length || 0} Followers</Badge>
+                  <Badge variant="secondary">{displayFollowerCount} Followers</Badge>
                   <Badge variant="secondary">{userProfile?.following?.length || 0} Following</Badge>
                 </div>
                 <div className="text-muted-foreground text-sm mb-2">{userProfile?.bio}</div>
-                {user?.id !== userProfile?.id && (
+                {isReady && user?.id !== userProfile?.id && (
                   <Button
                     onClick={handleFollowToggle}
-                    disabled={loading}
-                    variant={isFollowing ? "destructive" : "default"}
+                    disabled={loading || optimisticIsFollowing !== null}
+                    variant={displayIsFollowing ? "destructive" : "default"}
                     className="mt-1"
                   >
-                    {isFollowing ? 'Unfollow' : 'Follow'}
+                    {displayIsFollowing ? 'Unfollow' : 'Follow'}
                   </Button>
                 )}
                 {user?.id === userProfile?.id && (
@@ -273,14 +296,14 @@ const UserProfile = ({ userName: userNameProp, variant }) => {
               </div>
             </CardHeader>
             <Separator />
-            {(isFollowing || user?.id === userProfile?.id) ? null : (
+            {(displayIsFollowing || user?.id === userProfile?.id) ? null : (
               <CardContent>
                 <div className="text-muted-foreground italic mt-4">Follow this user to view their posts.</div>
               </CardContent>
             )}
           </Card>
           {/* About Card */}
-          {(isFollowing || user?.id === userProfile?.id) && userProfile?.about && (
+          {(displayIsFollowing || user?.id === userProfile?.id) && userProfile?.about && (
             <Card className="rounded-2xl border bg-card">
               <CardHeader>
                 <h3 className="text-lg font-semibold text-foreground mb-2">About</h3>
@@ -292,7 +315,7 @@ const UserProfile = ({ userName: userNameProp, variant }) => {
             </Card>
           )}
           {/* Posts Card */}
-          {(isFollowing || user?.id === userProfile?.id) && userProfile?.posts?.length > 0 && (
+          {(displayIsFollowing || user?.id === userProfile?.id) && userProfile?.posts?.length > 0 && (
             <Card className="rounded-2xl border bg-card">
               <CardHeader>
                 <h3 className="text-lg font-semibold text-foreground mb-4">Posts</h3>

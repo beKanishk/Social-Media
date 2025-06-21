@@ -1,5 +1,5 @@
 import axios from "axios";
-import { GET_USER_PROFILE_FAILURE, GET_USER_PROFILE_REQUEST, GET_USER_PROFILE_SUCCESS, EDIT_USER_PROFILE_REQUEST, EDIT_USER_PROFILE_SUCCESS, EDIT_USER_PROFILE_FAILURE, CLEAR_USER_PROFILE_REQUEST, CLEAR_USER_PROFILE_SUCCESS, CLEAR_USER_PROFILE_FAILURE } from "./ActionType";
+import { GET_USER_PROFILE_FAILURE, GET_USER_PROFILE_REQUEST, GET_USER_PROFILE_SUCCESS, EDIT_USER_PROFILE_REQUEST, EDIT_USER_PROFILE_SUCCESS, EDIT_USER_PROFILE_FAILURE, CLEAR_USER_PROFILE_REQUEST, CLEAR_USER_PROFILE_SUCCESS, CLEAR_USER_PROFILE_FAILURE, CLEAR_USER_PROFILE_STATE } from "./ActionType";
 
   
 const baseURL = import.meta.env.VITE_BACKEND_URL;
@@ -83,4 +83,9 @@ export const clearUserProfile = (userDetailsDTO = {}, clearImage = false) => asy
             payload: error.response?.data?.message || "Failed to clear user profile",
         });
     }
+};
+
+// New action creator for clearing only the Redux state
+export const clearUserProfileState = () => (dispatch) => {
+    dispatch({ type: CLEAR_USER_PROFILE_STATE });
 };

@@ -1,4 +1,4 @@
-import { GET_USER_PROFILE_FAILURE, GET_USER_PROFILE_REQUEST, GET_USER_PROFILE_SUCCESS } from "./ActionType";
+import { GET_USER_PROFILE_FAILURE, GET_USER_PROFILE_REQUEST, GET_USER_PROFILE_SUCCESS, CLEAR_USER_PROFILE_STATE } from "./ActionType";
 import { EDIT_USER_PROFILE_REQUEST, EDIT_USER_PROFILE_SUCCESS, EDIT_USER_PROFILE_FAILURE } from "./ActionType";
 import { CLEAR_USER_PROFILE_REQUEST, CLEAR_USER_PROFILE_SUCCESS, CLEAR_USER_PROFILE_FAILURE } from "./ActionType";
 
@@ -28,6 +28,8 @@ import { CLEAR_USER_PROFILE_REQUEST, CLEAR_USER_PROFILE_SUCCESS, CLEAR_USER_PROF
         return { ...state, loading: false, userProfile: action.payload };
       case CLEAR_USER_PROFILE_FAILURE:
         return { ...state, loading: false, error: action.payload };
+      case CLEAR_USER_PROFILE_STATE:
+        return { ...state, userProfile: null, error: null };
       default:
         return state;
     }
