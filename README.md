@@ -16,7 +16,11 @@ This is a full-stack social media application built with a modern technology sta
 *Add your screenshots here. You can use markdown to display them.*
 
 _Example:_
-`![Feature Name](path/to/screenshot.png)`
+`![image](https://github.com/user-attachments/assets/036166d4-384c-4efd-aaae-4d415164c8d0)`
+`![image](https://github.com/user-attachments/assets/9c0f60db-0af8-40b7-8f15-154e673af141)`
+`![image](https://github.com/user-attachments/assets/f36c2666-5728-4786-866e-8d28652e6269)`
+`![image](https://github.com/user-attachments/assets/bfb67de2-9217-456f-ae62-6fadfcb0c56a)
+`
 
 ## Tech Stack
 
@@ -81,7 +85,7 @@ Before you begin, ensure you have the following installed:
 
 1.  **Clone the repository:**
     ```bash
-    git clone <repository-url>
+    git clone <[https://github.com/beKanishk/Social-Media.git]>
     cd <repository-folder>/SocialMedia
     ```
 
