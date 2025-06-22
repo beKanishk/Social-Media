@@ -49,11 +49,21 @@ const UserProfile = ({ userName: userNameProp, variant }) => {
   const isReady = user && userProfile;
 
   const isFollowing = isReady 
-    ? (user.following?.some(followingItem => userProfile.follower?.some(followerItem => followerItem.id == followingItem))) 
+    ? (user.following?.some(followingItem => userProfile.follower?.some(followerItem => followerItem == followingItem.id))) 
       || 
       (user.following?.some(followingItem =>userProfile.follower?.includes(followingItem)))
     : false;
-  
+
+    // console.log(user.following?.some(followingItem => userProfile.follower?.some(followerItem => followerItem == followingItem.id)));
+    // user.following?.some(followingItem => console.log(followingItem.id)
+    // )
+    
+    // console.log("IsFollowing", isFollowing);
+    
+    // console.log("User", user);
+    // console.log("User Profile", userProfile);
+    
+    
   const displayIsFollowing = optimisticIsFollowing !== null ? optimisticIsFollowing : isFollowing;
   const displayFollowerCount = optimisticFollowerCount !== null ? optimisticFollowerCount : userProfile?.follower?.length || 0;
 
@@ -100,6 +110,14 @@ const UserProfile = ({ userName: userNameProp, variant }) => {
     }
   };
 
+  if (!isReady) {
+    return (
+      <div className="flex items-center justify-center min-h-screen w-full bg-background">
+        <div className="terminal-loader text-blue-500 text-5xl"></div>
+      </div>
+    );
+  }
+
   if (variant === 'inline') {
     return (
       <div className="bg-background flex justify-center py-8 px-4 pt-24">
@@ -132,9 +150,35 @@ const UserProfile = ({ userName: userNameProp, variant }) => {
                     onClick={handleFollowToggle}
                     disabled={loading || optimisticIsFollowing !== null}
                     variant={displayIsFollowing ? "destructive" : "default"}
-                    className="mt-1"
+                    className="mt-1 flex items-center justify-center min-w-[110px]"
                   >
-                    {displayIsFollowing ? 'Unfollow' : 'Follow'}
+                    {(loading || optimisticIsFollowing !== null) ? (
+                      <>
+                        <svg
+                          className="animate-spin h-5 w-5 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        <span className="sr-only">{displayIsFollowing ? 'Unfollow' : 'Follow'}</span>
+                      </>
+                    ) : (
+                      <span>{displayIsFollowing ? 'Unfollow' : 'Follow'}</span>
+                    )}
                   </Button>
                 )}
                 {user?.id === userProfile?.id && (
@@ -278,9 +322,35 @@ const UserProfile = ({ userName: userNameProp, variant }) => {
                     onClick={handleFollowToggle}
                     disabled={loading || optimisticIsFollowing !== null}
                     variant={displayIsFollowing ? "destructive" : "default"}
-                    className="mt-1"
+                    className="mt-1 flex items-center justify-center min-w-[110px]"
                   >
-                    {displayIsFollowing ? 'Unfollow' : 'Follow'}
+                    {(loading || optimisticIsFollowing !== null) ? (
+                      <>
+                        <svg
+                          className="animate-spin h-5 w-5 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        <span className="sr-only">{displayIsFollowing ? 'Unfollow' : 'Follow'}</span>
+                      </>
+                    ) : (
+                      <span>{displayIsFollowing ? 'Unfollow' : 'Follow'}</span>
+                    )}
                   </Button>
                 )}
                 {user?.id === userProfile?.id && (

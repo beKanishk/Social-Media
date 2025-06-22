@@ -52,7 +52,7 @@ const Login = () => {
                     <FormControl>
                       <Input
                         className="border border-gray-300 p-5"
-                        placeholder="Email or Username"
+                        placeholder="Email"
                         {...field}
                       />
                     </FormControl>
