@@ -34,40 +34,35 @@ const App = () => {
     }
   }, [dispatch]);
 
-  const privateRoutes = userLoaded ? (
-    <>
-      <Route path="/home" element={<PrivateRoute><Home /></PrivateRoute>} />
-      <Route path="/post" element={<PrivateRoute><Post /></PrivateRoute>} />
-      <Route path="/chat" element={<PrivateRoute><ChatPage /></PrivateRoute>} />
-      <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
-      <Route path="/search" element={<PrivateRoute><Search /></PrivateRoute>} />
-      <Route path="/user/:userName" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
-    </>
-  ) : (
-    <Route path="*" element={
-      <div className="flex justify-center items-center h-screen bg-background">
-        <div className="terminal-loader text-blue-500 text-5xl"></div>
-      </div>
-    } />
-  );
-
   return (
     <>
       <ToastContainer position="top-right" autoClose={3000} />
-      {userLoaded ? (
-        <WebSocketProvider userEmail={userEmail}>
-          <Routes>
-            <Route path="/" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            {privateRoutes}
-            <Route path="*" element={user ? <Home /> : <Login />} />
-          </Routes>
-        </WebSocketProvider>
-      ) : (
-        <div className="flex justify-center items-center h-screen bg-background">
-          <div className="terminal-loader text-blue-500 text-5xl"></div>
-        </div>
-      )}
+      <WebSocketProvider userEmail={userEmail}>
+        <Routes>
+          {/* Public routes - no loader */}
+          <Route path="/" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          
+          {/* Private routes - with loader */}
+          {!userLoaded ? (
+            <Route path="*" element={
+              <div className="flex justify-center items-center h-screen bg-background">
+                <div className="terminal-loader text-blue-500 text-5xl"></div>
+              </div>
+            } />
+          ) : (
+            <>
+              <Route path="/home" element={<PrivateRoute><Home /></PrivateRoute>} />
+              <Route path="/post" element={<PrivateRoute><Post /></PrivateRoute>} />
+              <Route path="/chat" element={<PrivateRoute><ChatPage /></PrivateRoute>} />
+              <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+              <Route path="/search" element={<PrivateRoute><Search /></PrivateRoute>} />
+              <Route path="/user/:userName" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
+              <Route path="*" element={user ? <Home /> : <Login />} />
+            </>
+          )}
+        </Routes>
+      </WebSocketProvider>
     </>
   );
 };

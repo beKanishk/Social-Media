@@ -49,14 +49,17 @@ const UserProfile = ({ userName: userNameProp, variant }) => {
   const isReady = user && userProfile;
 
   const isFollowing = isReady 
-    ? (user.following?.some(followingItem => userProfile.follower?.some(followerItem => followerItem == followingItem.id))) 
+    ? (user.following?.some(followingItem => userProfile?.follower?.some(followerItem => followerItem.id == followingItem))) 
       || 
-      (user.following?.some(followingItem =>userProfile.follower?.includes(followingItem)))
+      (user.following?.some(followingItem =>userProfile?.follower?.includes(followingItem)))
+      ||
+      (user.following?.some(followingItem => userProfile?.follower?.some(followerItem => followerItem == followingItem.id)))
     : false;
 
-    // console.log(user.following?.some(followingItem => userProfile.follower?.some(followerItem => followerItem == followingItem.id)));
-    // user.following?.some(followingItem => console.log(followingItem.id)
-    // )
+    // console.log(user.following?.some(followingItem => userProfile?.follower?.some(followerItem => followerItem.id == followingItem)));
+    // userProfile?.follower?.some(followerItem => console.log(followerItem.id))
+    // user?.following?.some(followingItem => console.log(followingItem))
+    // user.following?.some(followingItem => console.log(followingItem.id))
     
     // console.log("IsFollowing", isFollowing);
     
